@@ -1,0 +1,6 @@
+src/build
+src/chromedriver*
+src/__*
+src/dist
+*.mp4
+chromedriver*
