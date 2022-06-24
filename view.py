@@ -3,6 +3,7 @@ from tkinter import *
 import tkinter as tk
 import os #comando para o shell
 import subprocess #chamada para background
+count = 0
 class Application:
     def __init__(self, master=None):
         self.fontePadrao = ("Arial", "10")
@@ -31,7 +32,7 @@ class Application:
         self.nome.pack(side=LEFT)
 
         self.autenticar = Button(self.quartoContainer)
-        self.autenticar["text"] = "Gravar"
+        self.autenticar["text"] = f'"Gravar " {count}'
         self.autenticar["font"] = ("Calibri", "8")
         self.autenticar["width"] = 12
         self.autenticar["command"] = self.chamaGravar
@@ -47,6 +48,7 @@ class Application:
 
     #Método chama software
     def chamaGravar(self):
+        #count +=1
         link = self.nome.get()
         if (link != ""):
             subprocess.Popen(["python", "comandos.py ", link], shell=True)
