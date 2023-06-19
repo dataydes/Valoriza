@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from logging import error
 import sys #coleta o link
-import time #tempo de espera da url
+import time
 from urllib import request, parse
 from warnings import catch_warnings #biblioteca da url
 from selenium import webdriver #Coleta o nome
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
-from datetime import datetime #define a hora
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.common.by import By
+
 import os #comando para o shell
 
 def finalizar():
@@ -15,28 +16,33 @@ def finalizar():
 	driver.quit()
 	return None
 
-for arg in sys.argv:
-	print(arg)
+arg = sys.argv[1] #Recupera a variável de entrada
 print ("Buscando vídeo")
+arg2 = int(sys.argv[2]) #Recupera a variável de entrada
 
 #Coleta dados do browser
+options = webdriver.ChromeOptions()
+options.add_experimental_option("excludeSwitches", ["enable-automation"])
+options.add_experimental_option("useAutomationExtension", False)
+options.add_argument('window-size=800x600')
+#options.add_argument('--headless')
+service = ChromeService(executable_path=ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=options)
 
-options = Options()
-options.add_argument('--headless')
-options.add_argument('window-size=800x600') # optional
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 #acessando dados
 try:
 	driver.get(arg)
-	nome = driver.find_element_by_xpath('//*[@id="container"]/h1/yt-formatted-string').text	
-	print (nome)
-	sair = 0
-	while sair != "x":
-		print ("Para finalizar aperte x...")
-		sair = input()
+	time.sleep(10)
+	try:
+		play = driver.find_element(By.CLASS_NAME,"ytp-play-button ytp-button").click()
+	except:
+		play1 = driver.find_element(By.CLASS_NAME,"ytp-large-play-button ytp-button").click()		
 except:
-	finalizar()
+	#finalizar()
 	print("Não foi possível encontrar o vídeo, confira o link fornecido.")
-	os._exit()
-
-finalizar()
+	#os._exit()
+sair = 0 #Fecha o app;
+while sair != "x":
+	print ("Para finalizar aperte x...")
+	sair = input()
+#finalizar()
