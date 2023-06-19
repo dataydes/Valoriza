@@ -31,8 +31,7 @@ driver = webdriver.Chrome(service=service, options=options)
 
 #acessando dados
 try:
-	driver.get(arg)
-	time.sleep(10)
+	driver.get(arg)	
 	try:
 		play = driver.find_element(By.CLASS_NAME,"ytp-play-button ytp-button").click()
 	except:
