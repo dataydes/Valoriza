@@ -32,10 +32,13 @@ driver = webdriver.Chrome(service=service, options=options)
 #acessando dados
 try:
 	driver.get(arg)	
+	play = driver.find_element(By.CLASS_NAME,"style-scope yt-icon").click()
+	time.sleep(3)	
 	try:
-		play = driver.find_element(By.CLASS_NAME,"ytp-play-button ytp-button").click()
+		play = driver.find_element(By.CLASS_NAME,"style-scope ytd-watch-metadata").send_keys("k")		
 	except:
-		play1 = driver.find_element(By.CLASS_NAME,"ytp-large-play-button ytp-button").click()		
+		print("Não foi possível iniciar o vídeo")
+		sair = "x"
 except:
 	#finalizar()
 	print("Não foi possível encontrar o vídeo, confira o link fornecido.")
