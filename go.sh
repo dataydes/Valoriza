@@ -1,1 +1,0 @@
-bk python3 comandos.py $1

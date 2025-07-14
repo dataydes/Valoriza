@@ -1,0 +1,34 @@
+2025-07-13 21:48:20,345 - MainThread - INFO - Iniciando gerenciador com 1 workers
+2025-07-13 21:48:20,346 - MainThread - INFO - Gerenciador iniciado com sucesso
+2025-07-13 21:48:40,854 - MainThread - INFO - Tarefa task_0001 adicionada à fila
+2025-07-13 21:48:40,854 - Worker-1 - INFO - Processando tarefa task_0001: https://www.youtube.com/watch?v=fckLi9w0iVg
+2025-07-13 21:48:40,862 - Worker-1 - INFO - ====== WebDriver manager ======
+2025-07-13 21:48:43,086 - Worker-1 - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-13 21:48:43,217 - Worker-1 - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-13 21:48:43,304 - Worker-1 - INFO - Driver [C:\Users\danie\.wdm\drivers\chromedriver\win64\138.0.7204.94\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-13 21:48:43,324 - Worker-1 - ERROR - Erro ao inicializar o driver: WebDriver.__init__() got multiple values for argument 'options'
+2025-07-13 21:48:43,324 - Worker-1 - ERROR - Tarefa task_0001 falhou: WebDriver.__init__() got multiple values for argument 'options'
+2025-07-13 21:49:01,967 - MainThread - INFO - Tarefa task_0002 adicionada à fila
+2025-07-13 21:49:01,968 - Worker-1 - INFO - Processando tarefa task_0002: https://www.youtube.com/watch?v=fckLi9w0iVg
+2025-07-13 21:49:01,969 - Worker-1 - INFO - ====== WebDriver manager ======
+2025-07-13 21:49:04,335 - Worker-1 - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-13 21:49:04,441 - Worker-1 - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-13 21:49:04,539 - Worker-1 - INFO - Driver [C:\Users\danie\.wdm\drivers\chromedriver\win64\138.0.7204.94\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-13 21:49:04,541 - Worker-1 - ERROR - Erro ao inicializar o driver: WebDriver.__init__() got multiple values for argument 'options'
+2025-07-13 21:49:04,542 - Worker-1 - ERROR - Tarefa task_0002 falhou: WebDriver.__init__() got multiple values for argument 'options'
+2025-07-13 21:49:54,231 - MainThread - INFO - Sinal 2 recebido. Finalizando...
+2025-07-13 21:49:54,232 - MainThread - INFO - Parando gerenciador...
+2025-07-13 21:49:54,237 - MainThread - INFO - Gerenciador parado
+2025-07-13 21:50:04,716 - MainThread - INFO - Iniciando gerenciador com 3 workers
+2025-07-13 21:50:04,717 - MainThread - INFO - Gerenciador iniciado com sucesso
+2025-07-13 21:50:45,607 - MainThread - INFO - Tarefa task_0001 adicionada à fila
+2025-07-13 21:50:45,607 - Worker-1 - INFO - Processando tarefa task_0001: https://www.youtube.com/watch?v=fckli9w0ivg
+2025-07-13 21:50:45,608 - Worker-1 - INFO - ====== WebDriver manager ======
+2025-07-13 21:50:48,136 - Worker-1 - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-13 21:50:48,238 - Worker-1 - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-13 21:50:48,393 - Worker-1 - INFO - Driver [C:\Users\danie\.wdm\drivers\chromedriver\win64\138.0.7204.94\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-13 21:50:48,398 - Worker-1 - ERROR - Erro ao inicializar o driver: WebDriver.__init__() got multiple values for argument 'options'
+2025-07-13 21:50:48,405 - Worker-1 - ERROR - Tarefa task_0001 falhou: WebDriver.__init__() got multiple values for argument 'options'
+2025-07-13 21:52:18,137 - MainThread - INFO - Sinal 2 recebido. Finalizando...
+2025-07-13 21:52:18,138 - MainThread - INFO - Parando gerenciador...
+2025-07-13 21:52:18,139 - MainThread - INFO - Gerenciador parado
