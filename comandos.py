@@ -2,6 +2,7 @@
 import sys
 import time
 import random
+from requests import options
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -35,14 +36,14 @@ def main():
         options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--no-sandbox')
-        options.add_argument('--disable-gpu')
+        #options.add_argument('--disable-gpu')
         options.add_argument('--mute-audio')  # Silenciar áudio
         options.add_argument('window-size=800x600')
+        options.add_argument('--headless')
         options.add_argument('--log-level=3')  # Reduzir logs
         
         # Modo headless opcional (descomente para economizar recursos)
-        # options.add_argument('--headless')
-        
+                
         # Preferências adicionais para economizar recursos
         prefs = {
             "profile.default_content_setting_values.notifications": 2,
