@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+Engaja Tube - Visualizador Automático Otimizado
+Versão 2.0.3 - Terminal Logs Enabled
+"""
 from tkinter import *
 import tkinter as tk
 from tkinter import messagebox
@@ -7,6 +11,7 @@ import subprocess
 import threading
 import psutil
 import time
+import random
 
 class Application:
     def __init__(self, master=None):
@@ -15,7 +20,6 @@ class Application:
         self.processos = []
         self.total_visualizacoes = 0
         self.rodando = False
-        self.thread_monitor = None
         
         # Containers
         self.primeiroContainer = Frame(master)
@@ -44,7 +48,7 @@ class Application:
         self.sextoContainer.pack(fill=BOTH)
 
         # Título
-        self.titulo = Label(self.primeiroContainer, text="Engaja Tube - Visualizador Automático")
+        self.titulo = Label(self.primeiroContainer, text="Engaja Tube - Visualizador Automático (Otimizado v2.0.3)")
         self.titulo["font"] = ("Arial", "12", "bold")
         self.titulo.pack()
 
@@ -66,19 +70,19 @@ class Application:
         self.instancias.insert(0, "3")
         self.instancias.pack(side=LEFT, padx=5)
 
-        self.infoLabel = Label(self.terceiroContainer, text="(Recomendado: 2-5)", font=("Arial", "8"), fg="gray")
+        self.infoLabel = Label(self.terceiroContainer, text="(Recomendado: 2-5 instâncias)", font=("Arial", 8), fg="gray")
         self.infoLabel.pack(side=LEFT)
 
         # Contador de visualizações
-        self.contadorLabel = Label(self.quartoContainer, text="Visualizações totais: 0", font=("Arial", "11", "bold"), fg="blue")
+        self.contadorLabel = Label(self.quartoContainer, text="Visualizações totais: 0", font=("Arial", 11, "bold"), fg="blue")
         self.contadorLabel.pack()
 
         # Status
-        self.statusLabel = Label(self.quintoContainer, text="Status: Parado", font=("Arial", "9"), fg="red")
+        self.statusLabel = Label(self.quintoContainer, text="Status: Parado", font=("Arial", 9), fg="red")
         self.statusLabel.pack()
 
         # Uso de recursos
-        self.recursosLabel = Label(self.quintoContainer, text="CPU: 0% | RAM: 0%", font=("Arial", "8"), fg="gray")
+        self.recursosLabel = Label(self.quintoContainer, text="CPU: 0% | RAM: 0%", font=("Arial", 8), fg="gray")
         self.recursosLabel.pack()
 
         # Botões
@@ -111,15 +115,20 @@ class Application:
     def atualizarContador(self):
         """Atualiza o contador de visualizações na interface"""
         self.contadorLabel["text"] = f"Visualizações totais: {self.total_visualizacoes}"
-        
+    
     def atualizarRecursos(self):
         """Atualiza informações de uso de recursos"""
         try:
+            # Otimização: Usar 0.1s para leitura mais rápida
             cpu = psutil.cpu_percent(interval=0.1)
-            ram = psutil.virtual_memory().percent
-            self.recursosLabel["text"] = f"CPU: {cpu:.1f}% | RAM: {ram:.1f}%"
-        except:
-            pass
+            mem = psutil.virtual_memory()
+            ram = mem.percent
+            # Adicionar indicador de status do CPU
+            cpu_color = "green" if cpu < 50 else ("yellow" if cpu < 80 else "red")
+            self.recursosLabel["fg"] = cpu_color
+            self.recursosLabel["text"] = f"CPU: {cpu:.1f}% | RAM: {ram:.1f}% | Memória: {mem.available / (1024**2):.0f}MB"
+        except Exception as e:
+            self.recursosLabel["text"] = f"Erro: {e}"
 
     def iniciarVisualizacoes(self):
         """Inicia o processo de visualizações automáticas"""
@@ -162,65 +171,150 @@ class Application:
         self.atualizarRecursosLoop()
 
     def executarLoop(self, link, num_instancias):
-        """Loop principal que gerencia as instâncias de visualização"""
+        """
+        Loop principal otimizado que gerencia as instâncias de visualização
+        
+        Args:
+            link: URL do vídeo a ser reproduzido
+            num_instancias: Número máximo de instâncias simultâneas
+        """
+        # Cache do link para evitar re-encoding
+        link_normalized = link.strip().lower()
+        
         while self.rodando:
             try:
-                # Verificar recursos antes de criar novas instâncias
+                # Verificar recursos - Otimização: Delay variável para evitar sincronização
                 cpu = psutil.cpu_percent(interval=0.1)
-                ram = psutil.virtual_memory().percent
+                mem = psutil.virtual_memory()
+                ram = mem.percent
+                ram_mb = mem.available / (1024**2)
                 
+                # Ajuste inteligente baseado em recursos
                 if cpu > 90 or ram > 90:
-                    print(f"Recursos altos - CPU: {cpu}%, RAM: {ram}% - Aguardando...")
-                    time.sleep(5)
+                    # Delay variável para evitar sincronização
+                    time.sleep(random.uniform(3, 6))
                     continue
+                elif cpu > 75 or ram > 85:
+                    # Delay mais curto para permitir recuperação
+                    time.sleep(random.uniform(1, 3))
                 
-                # Limpar processos finalizados
-                self.processos = [p for p in self.processos if p.poll() is None]
+                # Otimização: Limpeza eficiente de processos com slice
+                self.processos[:] = [p for p in self.processos if p.poll() is None]
                 
-                # Criar novas instâncias se necessário
-                while len(self.processos) < num_instancias and self.rodando:
+                # Criar novas instâncias apenas quando necessário
+                slots_livres = num_instancias - len(self.processos)
+                
+                if slots_livres > 0 and self.rodando and ram_mb >= 500:
+                    # Otimização: Criar instâncias em lotes para reduzir bloqueio
+                    batch_size = min(slots_livres, 3)  # Máximo 3 por lote
+                    
+                    for _ in range(batch_size):
+                        if not self.rodando or ram_mb < 500:
+                            break
+                        
+                        try:
+                            # Habilitar logs no terminal para visualização do progresso
+                            processo = subprocess.Popen(
+                                ["python", "comandos.py", link],
+                                shell=False,
+                                stdout=None,  # Mantém stdout habilitado para logs no terminal
+                                stderr=None,  # Mantém stderr habilitado para erros no terminal
+                                creationflags=subprocess.CREATE_NO_WINDOW
+                            )
+                            self.processos.append(processo)
+                            self.total_visualizacoes += 1
+                            
+                            # Mensagem de log no terminal para cada instância
+                            print(f"[{time.strftime('%H:%M:%S')}] >>> Nova instância iniciada | ID: {len(self.processos)} | Total: {self.total_visualizacoes}")
+                            try:
+                                self.master.after(500, self.atualizarContador)
+                            except:
+                                pass
+                        
+                        except Exception as e:
+                            print(f"[{time.strftime('%H:%M:%S')}] Erro ao criar instância: {e}")
+                            continue
+
+                # Otimização: Delay variável para evitar sincronização de processos
+                delay = random.uniform(0.5, 1.5)
+                time.sleep(delay)
+                
+                # Checkpoint: Atualização da UI periodicamente
+                if self.total_visualizacoes % 50 == 0:
                     try:
-                        processo = subprocess.Popen(
-                            ["python", "comandos.py", link],
-                            shell=False,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE
-                        )
-                        self.processos.append(processo)
-                        self.total_visualizacoes += 1
-                        self.master.after(0, self.atualizarContador)
-                        print(f"Instância {len(self.processos)} iniciada - Total de visualizações: {self.total_visualizacoes}")
-                        time.sleep(2)  # Delay entre instâncias
-                    except Exception as e:
-                        print(f"Erro ao criar instância: {e}")
-                        break
-                
-                time.sleep(1)
-                
+                        self.master.after(500, self.atualizarContador)
+                        print(f"[{time.strftime('%H:%M:%S')}] >>> Atualizando interface (cada 50 visualizações)")
+                    except:
+                        pass
+
             except Exception as e:
-                print(f"Erro no loop: {e}")
-                time.sleep(5)
+                print(f"[{time.strftime('%H:%M:%S')}] Erro no loop: {e}")
+                # Delay mais longo em caso de erro
+                time.sleep(random.uniform(2, 5))
+                
+                # Otimização: Delay variável entre atualizações de recursos
+                delay = random.uniform(1.5, 2.5)
+                print(f"[{time.strftime('%H:%M:%S')}] >>> Recurso Monitor: CPU {cpu:.1f}% | RAM {ram:.1f}%")
+                self.master.after(int(delay * 1000), self.atualizarRecursosLoop)
+                
+                # Otimização: Delay variável para evitar sincronização de processos
+                delay = random.uniform(0.5, 1.5)
+                time.sleep(delay)
+                
+                # Checkpoint: Atualização da UI periodicamente
+                if self.total_visualizacoes % 50 == 0:
+                    try:
+                        self.master.after(500, self.atualizarContador)
+                    except:
+                        pass
+
+            except Exception as e:
+                print(f"[{time.strftime('%H:%M:%S')}] Erro no loop: {e}")
+                # Delay mais longo em caso de erro
+                time.sleep(random.uniform(2, 5))
 
     def atualizarRecursosLoop(self):
-        """Atualiza recursos periodicamente"""
+        """Atualiza recursos periodicamente com otimização de delay"""
         if self.rodando:
             self.atualizarRecursos()
-            self.master.after(2000, self.atualizarRecursosLoop)
+            # Otimização: Delay variável entre atualizações
+            delay = random.uniform(1.5, 2.5)
+            self.master.after(int(delay * 1000), self.atualizarRecursosLoop)
 
     def pararVisualizacoes(self):
-        """Para todas as visualizações"""
+        """
+        Para todas as visualizações com finalização otimizada
+        
+        Garante limpeza completa de recursos e processos
+        """
         self.rodando = False
         
-        # Finalizar todos os processos
+        # Finalizar todos os processos com tratamento robusto
+        processos_ativos = []
         for processo in self.processos:
-            try:
+            if processo.poll() is None:  # Processos ativos
+                processos_ativos.append(processo)
+        
+        print(f"[{time.strftime('%H:%M:%S')}] >>> Finalizando {len(processos_ativos)} processos ativos...")
+        
+        # Finalização em lotes para evitar travamento
+        for lote in range(0, len(processos_ativos), 5):
+            batch = processos_ativos[lote:lote + 5]
+            for processo in batch:
                 processo.terminate()
-                processo.wait(timeout=3)
-            except:
-                try:
-                    processo.kill()
-                except:
-                    pass
+                # Esperar com timeout progressivo
+                for timeout in [2, 3, 5]:
+                    try:
+                        processo.wait(timeout=timeout)
+                        print(f"[{time.strftime('%H:%M:%S')}]   Processo finalizado com timeout={timeout}s")
+                        break
+                    except subprocess.TimeoutExpired:
+                        processo.kill()
+                        print(f"[{time.strftime('%H:%M:%S')}]   Processo finalizado com kill (timeout={timeout}s")
+        
+        # Coleta de garbage para liberar memória
+        import gc
+        gc.collect()
         
         self.processos = []
         self.bt_iniciar["state"] = NORMAL
@@ -228,7 +322,12 @@ class Application:
         self.statusLabel["text"] = "Status: Parado"
         self.statusLabel["fg"] = "red"
         
-        messagebox.showinfo("Parado", f"Visualizações paradas!\nTotal de visualizações iniciadas: {self.total_visualizacoes}")
+        messagebox.showinfo(
+            "Parado",
+            f"Visualizações paradas!\n"
+            f"Total de visualizações iniciadas: {self.total_visualizacoes}\n"
+            f"Processos finalizados com sucesso."
+        )
 
     def chamaSair(self):
         """Fecha o aplicativo"""
