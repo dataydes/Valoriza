@@ -1,7 +1,20 @@
-echo "Instalando pacotes necessários"
-python -m pip install --upgrade pip
-pip install urllib3
-pip install selenium
-pip install html5lib
-pip install requests
-pip install webdriver-manager
+@echo off
+echo ========================================
+echo  Instalador - Engaja Tube (Valoriza)
+echo ========================================
+echo.
+echo Instalando dependencias necessarias...
+echo.
+
+pip install --upgrade pip
+pip install -r requirements.txt
+
+echo.
+echo ========================================
+echo  Instalacao concluida!
+echo ========================================
+echo.
+echo Para executar o programa, digite:
+echo python view.py
+echo.
+pause
