@@ -70,7 +70,15 @@ class Application:
         self.instancias.insert(0, "3")
         self.instancias.pack(side=LEFT, padx=5)
 
-        self.infoLabel = Label(self.terceiroContainer, text="(Recomendado: 2-5 instâncias)", font=("Arial", 8), fg="gray")
+        self.regiaoLabel = Label(self.terceiroContainer, text="Região/IP Simulado:", font=self.fontePadrao)
+        self.regiaoLabel.pack(side=LEFT, padx=5)
+
+        self.regioes = ["Brasil", "EUA", "Reino Unido", "Alemanha", "França", "Japão", "Austrália", "Canadá"]
+        self.regiao = StringVar(value="Brasil")
+        self.regiaoDropdown = OptionMenu(self.terceiroContainer, self.regiao, *self.regioes)
+        self.regiaoDropdown.pack(side=LEFT, padx=5)
+
+        self.infoLabel = Label(self.terceiroContainer, text="(Recomendado: 2-5 instâncias | Use proxies para evitar detecção)", font=("Arial", 8), fg="gray")
         self.infoLabel.pack(side=LEFT)
 
         # Contador de visualizações
@@ -151,6 +159,8 @@ class Application:
             messagebox.showwarning("Aviso", "Número de instâncias inválido!")
             return
         
+        regiao = self.regiao.get()
+        
         # Verificar recursos disponíveis
         ram_disponivel = psutil.virtual_memory().available / (1024**3)  # GB
         if ram_disponivel < 2:
@@ -164,22 +174,34 @@ class Application:
         self.statusLabel["fg"] = "green"
         
         # Iniciar thread de monitoramento
-        self.thread_monitor = threading.Thread(target=self.executarLoop, args=(link, num_instancias), daemon=True)
+        self.thread_monitor = threading.Thread(target=self.executarLoop, args=(link, num_instancias, regiao), daemon=True)
         self.thread_monitor.start()
         
         # Iniciar atualização de recursos
         self.atualizarRecursosLoop()
 
-    def executarLoop(self, link, num_instancias):
+    def executarLoop(self, link, num_instancias, regiao=None):
         """
         Loop principal otimizado que gerencia as instâncias de visualização
         
         Args:
             link: URL do vídeo a ser reproduzido
             num_instancias: Número máximo de instâncias simultâneas
+            regiao: Região simulada (Brasil, EUA, etc.)
         """
         # Cache do link para evitar re-encoding
         link_normalized = link.strip().lower()
+        
+        # Mapeamento de regiões para proxies (opcional)
+        regioes_mapa = {
+            "EUA": "177.55.67.185",
+            "Reino Unido": "23.185.202.126",
+            "Alemanha": "23.185.113.45",
+            "França": "23.185.22.155",
+            "Japão": "203.105.134.86",
+            "Austrália": "103.224.238.24",
+            "Canadá": "45.249.12.127"
+        }
         
         while self.rodando:
             try:
@@ -213,9 +235,19 @@ class Application:
                             break
                         
                         try:
+                            # Construir argumentos do subprocesso
+                            args = ["python", "comandos.py", link]
+                            
+                            # Adicionar parâmetros de região/proxy se especificado
+                            if regiao and regiao != "Brasil":
+                                ip_simulado = regioes_mapa.get(regiao, "")
+                                if ip_simulado:
+                                    args.append("--proxy")
+                                    args.append(ip_simulado)
+                            
                             # Habilitar logs no terminal para visualização do progresso
                             processo = subprocess.Popen(
-                                ["python", "comandos.py", link],
+                                args,
                                 shell=False,
                                 stdout=None,  # Mantém stdout habilitado para logs no terminal
                                 stderr=None,  # Mantém stderr habilitado para erros no terminal
@@ -225,7 +257,8 @@ class Application:
                             self.total_visualizacoes += 1
                             
                             # Mensagem de log no terminal para cada instância
-                            print(f"[{time.strftime('%H:%M:%S')}] >>> Nova instância iniciada | ID: {len(self.processos)} | Total: {self.total_visualizacoes}")
+                            regio_info = f" | {regiao}" if regiao and regiao != "Brasil" else ""
+                            print(f"[{time.strftime('%H:%M:%S')}] >>> Nova instância iniciada | ID: {len(self.processos)} | Total: {self.total_visualizacoes}{regio_info}")
                             try:
                                 self.master.after(500, self.atualizarContador)
                             except:
