@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Engaja Tube - Visualizador Automático Otimizado
-Versão 2.0.3 - Terminal Logs Enabled
+Versão 2.0.5 - Tor Browser Enabled (Chrome)
 """
 from tkinter import *
 import tkinter as tk
@@ -47,8 +47,28 @@ class Application:
         self.sextoContainer["pady"] = 20
         self.sextoContainer.pack(fill=BOTH)
 
+        # Controle de Headless - Checkbox com status dinâmico
+        self.headlessVar = BooleanVar(value=True)  # Padrão: True (headless ativado)
+        self.headlessLabel = Label(self.sextoContainer, text="Headless:", font=self.fontePadrao)
+        self.headlessLabel.pack(side=LEFT)
+        self.headlessCheck = Checkbutton(self.sextoContainer, variable=self.headlessVar, 
+                                         text="(Ativar)", font=self.fontePadrao, fg="blue")
+        self.headlessCheck.pack(side=LEFT)
+        
+        # Label dinâmico para status do headless
+        self.headlessStatusVar = StringVar(value="(Chrome | Headless ativo)")
+        self.headlessStatusLabel = Label(self.sextoContainer, text=self.headlessStatusVar.get(), 
+                                         font=("Arial", 8), fg="blue")
+        self.headlessStatusLabel.pack(side=LEFT, padx=5)
+        
+        # Atualizar texto do checkbox baseado no estado inicial
+        self.updateHeadlessText()
+        
+        # Criar callback para atualizar texto ao alterar checkbox
+        self.headlessCheck.configure(command=self.updateHeadlessText)
+
         # Título
-        self.titulo = Label(self.primeiroContainer, text="Engaja Tube - Visualizador Automático (Otimizado v2.0.3)")
+        self.titulo = Label(self.primeiroContainer, text="Engaja Tube - Visualizador Automático (Otimizado v2.0.5)")
         self.titulo["font"] = ("Arial", "12", "bold")
         self.titulo.pack()
 
@@ -70,15 +90,7 @@ class Application:
         self.instancias.insert(0, "3")
         self.instancias.pack(side=LEFT, padx=5)
 
-        self.regiaoLabel = Label(self.terceiroContainer, text="Região/IP Simulado:", font=self.fontePadrao)
-        self.regiaoLabel.pack(side=LEFT, padx=5)
-
-        self.regioes = ["Brasil", "EUA", "Reino Unido", "Alemanha", "França", "Japão", "Austrália", "Canadá"]
-        self.regiao = StringVar(value="Brasil")
-        self.regiaoDropdown = OptionMenu(self.terceiroContainer, self.regiao, *self.regioes)
-        self.regiaoDropdown.pack(side=LEFT, padx=5)
-
-        self.infoLabel = Label(self.terceiroContainer, text="(Recomendado: 2-5 instâncias | Use proxies para evitar detecção)", font=("Arial", 8), fg="gray")
+        self.infoLabel = Label(self.terceiroContainer, text="(Usando Chrome com proxy Tor para anonimato)", font=("Arial", 8), fg="blue")
         self.infoLabel.pack(side=LEFT)
 
         # Contador de visualizações
@@ -120,6 +132,19 @@ class Application:
         self.bt_sair["command"] = self.chamaSair
         self.bt_sair.pack(side=LEFT, padx=10)
 
+    def updateHeadlessText(self):
+        """Atualiza o texto do checkbox headless baseado no estado"""
+        if self.headlessVar.get():  # Headless ATIVO
+            self.headlessCheck["text"] = "(Ativar)"
+            self.headlessCheck["fg"] = "blue"
+            self.headlessStatusVar.set("(Chrome | Headless ativo)")
+            self.headlessStatusLabel["fg"] = "blue"
+        else:  # Headless DESATIVADO
+            self.headlessCheck["text"] = "(Desativar)"
+            self.headlessCheck["fg"] = "green"
+            self.headlessStatusVar.set("(Chrome | Headless desativado)")
+            self.headlessStatusLabel["fg"] = "orange"
+
     def atualizarContador(self):
         """Atualiza o contador de visualizações na interface"""
         self.contadorLabel["text"] = f"Visualizações totais: {self.total_visualizacoes}"
@@ -159,8 +184,6 @@ class Application:
             messagebox.showwarning("Aviso", "Número de instâncias inválido!")
             return
         
-        regiao = self.regiao.get()
-        
         # Verificar recursos disponíveis
         ram_disponivel = psutil.virtual_memory().available / (1024**3)  # GB
         if ram_disponivel < 2:
@@ -174,34 +197,22 @@ class Application:
         self.statusLabel["fg"] = "green"
         
         # Iniciar thread de monitoramento
-        self.thread_monitor = threading.Thread(target=self.executarLoop, args=(link, num_instancias, regiao), daemon=True)
+        self.thread_monitor = threading.Thread(target=self.executarLoop, args=(link, num_instancias), daemon=True)
         self.thread_monitor.start()
         
         # Iniciar atualização de recursos
         self.atualizarRecursosLoop()
 
-    def executarLoop(self, link, num_instancias, regiao=None):
+    def executarLoop(self, link, num_instancias):
         """
         Loop principal otimizado que gerencia as instâncias de visualização
         
         Args:
             link: URL do vídeo a ser reproduzido
             num_instancias: Número máximo de instâncias simultâneas
-            regiao: Região simulada (Brasil, EUA, etc.)
         """
         # Cache do link para evitar re-encoding
         link_normalized = link.strip().lower()
-        
-        # Mapeamento de regiões para proxies (opcional)
-        regioes_mapa = {
-            "EUA": "177.55.67.185",
-            "Reino Unido": "23.185.202.126",
-            "Alemanha": "23.185.113.45",
-            "França": "23.185.22.155",
-            "Japão": "203.105.134.86",
-            "Austrália": "103.224.238.24",
-            "Canadá": "45.249.12.127"
-        }
         
         while self.rodando:
             try:
@@ -236,14 +247,10 @@ class Application:
                         
                         try:
                             # Construir argumentos do subprocesso
+                            headless_arg = "--headless" if self.headlessVar.get() else ""
                             args = ["python", "comandos.py", link]
-                            
-                            # Adicionar parâmetros de região/proxy se especificado
-                            if regiao and regiao != "Brasil":
-                                ip_simulado = regioes_mapa.get(regiao, "")
-                                if ip_simulado:
-                                    args.append("--proxy")
-                                    args.append(ip_simulado)
+                            if headless_arg:
+                                args.extend(["--headless", "True"])
                             
                             # Habilitar logs no terminal para visualização do progresso
                             processo = subprocess.Popen(
@@ -253,12 +260,17 @@ class Application:
                                 stderr=None,  # Mantém stderr habilitado para erros no terminal
                                 creationflags=subprocess.CREATE_NO_WINDOW
                             )
+                            
+                            # Atualizar label de info
+                            status_text = "(Chrome | Headless ativo)" if self.headlessVar.get() else "(Chrome | Headless desativado)"
+                            self.headlessStatusLabel["text"] = status_text
+                            self.headlessStatusLabel["fg"] = "blue" if self.headlessVar.get() else "orange"
+
                             self.processos.append(processo)
                             self.total_visualizacoes += 1
                             
                             # Mensagem de log no terminal para cada instância
-                            regio_info = f" | {regiao}" if regiao and regiao != "Brasil" else ""
-                            print(f"[{time.strftime('%H:%M:%S')}] >>> Nova instância iniciada | ID: {len(self.processos)} | Total: {self.total_visualizacoes}{regio_info}")
+                            print(f"[{time.strftime('%H:%M:%S')}] >>> Nova instância iniciada | ID: {len(self.processos)} | Total: {self.total_visualizacoes}")
                             try:
                                 self.master.after(500, self.atualizarContador)
                             except:
@@ -276,7 +288,6 @@ class Application:
                 if self.total_visualizacoes % 50 == 0:
                     try:
                         self.master.after(500, self.atualizarContador)
-                        print(f"[{time.strftime('%H:%M:%S')}] >>> Atualizando interface (cada 50 visualizações)")
                     except:
                         pass
 
@@ -301,11 +312,6 @@ class Application:
                     except:
                         pass
 
-            except Exception as e:
-                print(f"[{time.strftime('%H:%M:%S')}] Erro no loop: {e}")
-                # Delay mais longo em caso de erro
-                time.sleep(random.uniform(2, 5))
-
     def atualizarRecursosLoop(self):
         """Atualiza recursos periodicamente com otimização de delay"""
         if self.rodando:
@@ -328,7 +334,7 @@ class Application:
             if processo.poll() is None:  # Processos ativos
                 processos_ativos.append(processo)
         
-        print(f"[{time.strftime('%H:%M:%S')}] >>> Finalizando {len(processos_ativos)} processos ativos...")
+        print(f"[{time.strftime('%H:%M:%S')}] >>> Finalizando {len(processos_ativos)} processos ativos. ..")
         
         # Finalização em lotes para evitar travamento
         for lote in range(0, len(processos_ativos), 5):
@@ -374,7 +380,7 @@ class Application:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Engaja Tube - Visualizador Automático")
+    root.title("Engaja Tube - Visualizador Automático (Tor)")
     root.geometry("600x400")
     try:
         root.iconbitmap(default='./src/icon.ico')
