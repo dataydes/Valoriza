@@ -65,14 +65,18 @@ def setup_driver(use_tor: bool = True, headless: bool = False, user_agent: str =
     options = Options()
 
 
-    # 🎨 Controle de interface (CORRIGIDO: headless precisa do argumento explícito)
+
+
+    # 🎨 Configuração de interface
+    # ✅ Headless requer --headless=new para Chrome moderno
     if headless:
-        # ✅ Correção: Selenium Chrome headless requer --headless=new E window-size
         options.add_argument("--headless=new")
-        options.add_argument("--window-size=1280,720")
+        options.add_argument("--window-position=-1,-1")  # Posição negativa para headless
         logger.info("Modo headless ATIVADO (navegador oculto)")
     else:
-        logger.info("Modo gráfico ATIVADO (navegador visível para monitoramento)")
+        # ✅ Modo gráfico: janela visível e com tamanho adequado
+        options.add_argument("--window-size=1280,720")
+        logger.info("Modo gráfico ATIVADO (janela visível para monitoramento)")
 
     # 🛡️ Anti-Detecção & Privacidade
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -83,14 +87,13 @@ def setup_driver(use_tor: bool = True, headless: bool = False, user_agent: str =
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--mute-audio")
 
-    # ⚡ Desempenho & Estabilidade
+    # ⚡ Desempenho & Estabilidade (sem duplicação)
     options.add_argument("--log-level=3")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-background-networking")
     options.add_argument("--disable-default-apps")
-    options.add_argument("--window-size=1366,768")  # ✅ Restaurado para modo gráfico
     options.add_argument("--dns-over-https=off")  # Previne vazamento DNS via DoH
 
     # 🌐 Configuração Tor (se ativada)
